@@ -16,7 +16,8 @@ class PhotoItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         itemView.findViewById<ImageView>(R.id.card_imageview).setImageResource(photoItem.photoId)
         itemView.findViewById<TextView>(R.id.card_title).setText(photoItem.nameId)
         itemView.findViewById<TextView>(R.id.card_location).setText(photoItem.locationId)
-        itemView.findViewById<Button>(R.id.card_see_original_button).setOnClickListener({ openLink(photoItem.link) })
+        itemView.findViewById<Button>(R.id.card_see_original_button)
+            .setOnClickListener { openLink(photoItem.link) }
     }
 
     private fun openLink(link: Uri) {

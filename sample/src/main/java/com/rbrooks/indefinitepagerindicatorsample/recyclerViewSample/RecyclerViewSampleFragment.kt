@@ -1,6 +1,5 @@
 package com.rbrooks.indefinitepagerindicatorsample.recyclerViewSample
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
@@ -31,13 +30,13 @@ class RecyclerViewSampleFragment : Fragment(), OnPagerNumberChangeListener {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_recyclerview_sample, container, false)
 
-        isVerticalEnabled = context.getSharedPreferences(
+        isVerticalEnabled = context?.getSharedPreferences(
             MainActivity.SHARED_PREFERENCES,
             AppCompatActivity.MODE_PRIVATE
-        ).getBoolean(
+        )?.getBoolean(
             isVerticalIndicatorKeyPreference,
             false
-        )
+        ) ?: false
 
         bindViews(view)
         setupViews()
@@ -54,10 +53,13 @@ class RecyclerViewSampleFragment : Fragment(), OnPagerNumberChangeListener {
     }
 
     private fun setupViews() {
-        recyclerViewAdapter = PhotoItemRecyclerAdapter(context)
-        recyclerView.adapter = recyclerViewAdapter
-        recyclerView.layoutManager =
-                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        context?.let {
+            recyclerViewAdapter = PhotoItemRecyclerAdapter(it)
+            recyclerView.adapter = recyclerViewAdapter
+            recyclerView.layoutManager =
+                    LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+
         if (isVerticalEnabled) {
             pagerIndicator.attachToRecyclerView(recyclerView)
             pagerIndicator.visibility = View.VISIBLE
