@@ -17,26 +17,31 @@ import com.rbrooks.indefinitepagerindicatorsample.util.PhotoItem
 
 class ViewPagerAdapter(private val context: Context) : PagerAdapter() {
 
-    override fun instantiateItem(container: ViewGroup?, position: Int): Any {
-        val view = LayoutInflater.from(context).inflate(R.layout.viewholder_image_card, container, false)
+    override fun isViewFromObject(view: View, `object`: Any): Boolean = view == `object`
+
+    override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
+        container.removeView(`object` as View)
+    }
+
+    override fun instantiateItem(container: ViewGroup, position: Int): Any {
+        val view =
+            LayoutInflater.from(context).inflate(R.layout.viewholder_image_card, container, false)
         val photoItem = PhotoItem.values()[position]
 
         view.findViewById<ImageView>(R.id.card_imageview).setImageResource(photoItem.photoId)
         view.findViewById<TextView>(R.id.card_title).setText(photoItem.nameId)
         view.findViewById<TextView>(R.id.card_location).setText(photoItem.locationId)
-        view.findViewById<Button>(R.id.card_see_original_button).setOnClickListener({ openLink(photoItem.link) })
+        view.findViewById<Button>(R.id.card_see_original_button)
+            .setOnClickListener { openLink(photoItem.link) }
 
-        container?.addView(view)
+        container.addView(view)
         return view
     }
 
-    override fun destroyItem(container: ViewGroup?, position: Int, `object`: Any?) {
-        container?.removeView(`object` as View)
-    }
-
-    override fun isViewFromObject(view: View?, `object`: Any?): Boolean = view == `object`
-
-    override fun getCount(): Int = PreferenceManager.getDefaultSharedPreferences(context).getInt(PagerNumberPickerDialogPreference.KEY_NUM_PAGES, PagerNumberPickerDialogPreference.DEFAULT_PAGES)
+    override fun getCount(): Int = PreferenceManager.getDefaultSharedPreferences(context).getInt(
+        PagerNumberPickerDialogPreference.KEY_NUM_PAGES,
+        PagerNumberPickerDialogPreference.DEFAULT_PAGES
+    )
 
     private fun openLink(link: Uri) {
         context.startActivity(Intent(Intent.ACTION_VIEW, link))

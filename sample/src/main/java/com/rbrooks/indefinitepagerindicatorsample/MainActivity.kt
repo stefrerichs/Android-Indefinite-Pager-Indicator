@@ -138,8 +138,8 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener,
     private fun restartApp() {
         baseContext.packageManager
             .getLaunchIntentForPackage(baseContext.packageName)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).run {
-                startActivity(this)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).let {
+                startActivity(it)
             }
     }
 }

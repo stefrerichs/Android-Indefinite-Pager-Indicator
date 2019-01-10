@@ -23,16 +23,20 @@ class ViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View.On
     private var pagerAdapter: ViewPagerAdapter? = null
     private var isVerticalEnabled = false
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val view = inflater.inflate(R.layout.fragment_view_pager_sample, container, false)
 
-        isVerticalEnabled = context.getSharedPreferences(
+        isVerticalEnabled = context?.getSharedPreferences(
             MainActivity.SHARED_PREFERENCES,
             AppCompatActivity.MODE_PRIVATE
-        ).getBoolean(
+        )?.getBoolean(
             MainActivity.isVerticalIndicatorKeyPreference,
             false
-        )
+        ) ?: false
 
         bindViews(view)
         setupViews()
@@ -49,16 +53,17 @@ class ViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View.On
     }
 
     private fun setupViews() {
-        pagerAdapter = ViewPagerAdapter(context)
-        viewPager.adapter = pagerAdapter
-        if (isVerticalEnabled) {
-            verticalPagerIndicator.attachToViewPager(viewPager)
-            verticalPagerIndicator.visibility = View.VISIBLE
-        } else {
-            pagerIndicator.attachToViewPager(viewPager)
-            pagerIndicator.visibility = View.VISIBLE
+        context?.let {
+            pagerAdapter = ViewPagerAdapter(it)
+            viewPager.adapter = pagerAdapter
+            if (isVerticalEnabled) {
+                verticalPagerIndicator.attachToViewPager(viewPager)
+                verticalPagerIndicator.visibility = View.VISIBLE
+            } else {
+                pagerIndicator.attachToViewPager(viewPager)
+                pagerIndicator.visibility = View.VISIBLE
+            }
         }
-
         previousButton.setOnClickListener(this)
         nextButton.setOnClickListener(this)
     }
@@ -71,16 +76,20 @@ class ViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View.On
         when (v?.id) {
             R.id.viewpager_previous_button -> {
                 if (viewPager.currentItem == 0) {
-                    viewPager.currentItem = viewPager.adapter.count - 1
+                    viewPager.currentItem = viewPager.adapter?.let {
+                        it.count - 1
+                    } ?: 0
                 } else {
                     viewPager.currentItem = viewPager.currentItem - 1
                 }
             }
             R.id.viewpager_next_button -> {
-                if (viewPager.currentItem == viewPager.adapter.count - 1) {
-                    viewPager.currentItem = 0
-                } else {
-                    viewPager.currentItem = viewPager.currentItem + 1
+                viewPager.adapter?.let {
+                    if (viewPager.currentItem == it.count - 1) {
+                        viewPager.currentItem = 0
+                    } else {
+                        viewPager.currentItem = viewPager.currentItem + 1
+                    }
                 }
             }
         }
