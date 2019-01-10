@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), TabLayout.OnTabSelectedListener,
                 restartApp()
             }
             R.id.action_quantity_button -> {
-                PagerNumberPickerDialogPreference().show(fragmentManager, null)
+                PagerNumberPickerDialogPreference().show(supportFragmentManager, null)
             }
         }
         return super.onOptionsItemSelected(item)
