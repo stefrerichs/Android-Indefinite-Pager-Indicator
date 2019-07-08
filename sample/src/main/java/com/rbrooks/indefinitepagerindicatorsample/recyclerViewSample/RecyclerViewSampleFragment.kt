@@ -57,7 +57,7 @@ class RecyclerViewSampleFragment : Fragment(), OnPagerNumberChangeListener {
         recyclerViewAdapter = PhotoItemRecyclerAdapter(context)
         recyclerView.adapter = recyclerViewAdapter
         recyclerView.layoutManager =
-                LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         if (isVerticalEnabled) {
             pagerIndicator.attachToRecyclerView(recyclerView)
             pagerIndicator.visibility = View.VISIBLE
