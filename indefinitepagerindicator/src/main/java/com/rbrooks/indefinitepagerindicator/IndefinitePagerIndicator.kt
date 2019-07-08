@@ -351,12 +351,13 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
 
             val view = getMostVisibleChild()
 
-            if (view != null) {
-                setIntermediateSelectedItemPosition(view)
-                offsetPercent = view.left.toFloat() / view.measuredWidth
-            }
-
             with(recyclerView?.layoutManager as LinearLayoutManager) {
+                if (view != null) {
+                    setIntermediateSelectedItemPosition(view)
+
+                    offsetPercent = getVisibleFraction(this, view)
+                }
+
                 val visibleItemPosition =
                     if (dx >= 0) findLastVisibleItemPosition() else findFirstVisibleItemPosition()
 
@@ -369,6 +370,14 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
             invalidate()
         }
 
+        private fun getVisibleFraction(linearLayoutManager: LinearLayoutManager, view: View): Float {
+            return if (linearLayoutManager.orientation == LinearLayoutManager.HORIZONTAL) {
+                view.left.toFloat() / view.measuredWidth
+            } else {
+                view.top.toFloat() / view.measuredHeight
+            }
+        }
+
         /**
          * Returns the currently most visible viewholder view in the Recyclerview.
          *
@@ -378,13 +387,16 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
         private fun getMostVisibleChild(): View? {
             var mostVisibleChild: View? = null
             var mostVisibleChildPercent = 0f
-            for (i in recyclerView?.layoutManager?.childCount!! - 1 downTo 0) {
-                val child = recyclerView?.layoutManager?.getChildAt(i)
-                if (child != null) {
-                    val percentVisible = calculatePercentVisible(child)
-                    if (percentVisible >= mostVisibleChildPercent) {
-                        mostVisibleChildPercent = percentVisible
-                        mostVisibleChild = child
+
+            with(recyclerView?.layoutManager as LinearLayoutManager) {
+                for (i in childCount - 1 downTo 0) {
+                    val child = getChildAt(i)
+                    if (child != null) {
+                        val percentVisible = calculatePercentVisible(child, orientation)
+                        if (percentVisible >= mostVisibleChildPercent) {
+                            mostVisibleChildPercent = percentVisible
+                            mostVisibleChild = child
+                        }
                     }
                 }
             }
@@ -392,14 +404,34 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
             return mostVisibleChild
         }
 
-        private fun calculatePercentVisible(child: View): Float {
-            val left = child.left
-            val right = child.right
-            val width = child.width
+        private fun calculatePercentVisible(child: View, orientation: Int): Float {
+            return when (orientation) {
+                LinearLayoutManager.HORIZONTAL -> calculatePercentVisibleWidth(child)
+                LinearLayoutManager.VERTICAL -> calculatePercentVisibleHeight(child)
+                else -> 1f
+            }
+        }
 
+        private fun calculatePercentVisibleWidth(child: View): Float {
+            val indicatorWidth = width
+
+            return with(child) {
+                calculateVisibleDimension(left, right, width, indicatorWidth)
+            }
+        }
+
+        private fun calculatePercentVisibleHeight(child: View): Float {
+            val indicatorHeight = height
+
+            return with(child) {
+                calculateVisibleDimension(top, bottom, height, indicatorHeight)
+            }
+        }
+
+        private fun calculateVisibleDimension(start: Int, end: Int, size: Int, indicatorSize: Int): Float {
             return when {
-                left < 0 -> right / width.toFloat()
-                right > getWidth() -> (getWidth() - left) / width.toFloat()
+                start < 0 -> end / size.toFloat()
+                end > indicatorSize -> (indicatorSize - start) / size.toFloat()
                 else -> 1f
             }
         }
