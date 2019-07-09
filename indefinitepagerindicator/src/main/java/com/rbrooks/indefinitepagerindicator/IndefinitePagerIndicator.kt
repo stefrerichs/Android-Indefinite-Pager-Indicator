@@ -4,16 +4,17 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.support.annotation.ColorInt
-import android.support.v4.content.ContextCompat
-import android.support.v4.view.ViewCompat
-import android.support.v4.view.ViewPager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.viewpager.widget.ViewPager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import kotlin.math.abs
 
 class IndefinitePagerIndicator @JvmOverloads constructor(
     context: Context,
@@ -206,7 +207,7 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
      * viewpager/recyclerview has scrolled.
      */
     private fun getRadius(coordinate: Float): Float {
-        val coordinateAbs = Math.abs(coordinate)
+        val coordinateAbs = abs(coordinate)
         // Get the coordinate where dots begin showing as fading dots (x coordinates > half of width of all large dots)
         val largeDotThreshold = dotCount.toFloat() / 2 * getDistanceBetweenTheCenterOfTwoDots()
         return when {
@@ -229,7 +230,7 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
      * All other dots will be the normal specified dot color.
      */
     private fun getPaint(coordinate: Float): Paint = when {
-        Math.abs(coordinate) < getDistanceBetweenTheCenterOfTwoDots() / 2 -> selectedDotPaint
+        abs(coordinate) < getDistanceBetweenTheCenterOfTwoDots() / 2 -> selectedDotPaint
         else -> dotPaint
     }
 
@@ -254,12 +255,14 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
     fun attachToRecyclerView(recyclerView: RecyclerView?) {
         viewPager?.removeOnPageChangeListener(this)
         viewPager = null
-
-        this.recyclerView?.removeOnScrollListener(internalRecyclerScrollListener)
+        internalRecyclerScrollListener?.let { listener ->
+            this.recyclerView?.removeOnScrollListener(listener)
+        }
 
         this.recyclerView = recyclerView
-        internalRecyclerScrollListener = InternalRecyclerScrollListener()
-        this.recyclerView?.addOnScrollListener(internalRecyclerScrollListener)
+        val listener = InternalRecyclerScrollListener()
+        this.recyclerView?.addOnScrollListener(listener)
+        internalRecyclerScrollListener = listener
     }
 
     /**
@@ -269,7 +272,9 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
      * If other ViewPager previously attached, remove reference to this class (page change listener).
      */
     fun attachToViewPager(viewPager: ViewPager?) {
-        recyclerView?.removeOnScrollListener(internalRecyclerScrollListener)
+        internalRecyclerScrollListener?.let { listener ->
+            recyclerView?.removeOnScrollListener(listener)
+        }
         recyclerView = null
 
         this.viewPager?.removeOnPageChangeListener(this)
@@ -347,14 +352,12 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
          * Use this percentage to also calculate the offsetPercentage
          * used to scale dots.
          */
-        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
-
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             val view = getMostVisibleChild()
 
-            with(recyclerView?.layoutManager as LinearLayoutManager) {
+            with(recyclerView.layoutManager as LinearLayoutManager) {
                 if (view != null) {
                     setIntermediateSelectedItemPosition(view)
-
                     offsetPercent = getVisibleFraction(this, view)
                 }
 
@@ -436,7 +439,7 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
             }
         }
 
-        private fun setIntermediateSelectedItemPosition(mostVisibleChild: View?) {
+        private fun setIntermediateSelectedItemPosition(mostVisibleChild: View) {
             with(recyclerView?.findContainingViewHolder(mostVisibleChild)?.adapterPosition!!) {
                 intermediateSelectedItemPosition = if (isRtl() && !verticalSupport) {
                     getRTLPosition(this)

@@ -1,9 +1,7 @@
-package com.rbrooks.indefinitepagerindicatorsample.viewPagerSample
+package com.rbrooks.indefinitepagerindicatorsample.rtlViewPagerSample
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.view.ViewPager
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,9 +10,10 @@ import com.rbrooks.indefinitepagerindicator.IndefinitePagerIndicator
 import com.rbrooks.indefinitepagerindicatorsample.MainActivity
 import com.rbrooks.indefinitepagerindicatorsample.R
 import com.rbrooks.indefinitepagerindicatorsample.util.OnPagerNumberChangeListener
+import com.rbrooks.indefinitepagerindicatorsample.viewPagerSample.ViewPagerAdapter
 
-class RTLViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View.OnClickListener {
-    private lateinit var viewPager: ViewPager
+class RTLViewPagerSampleFragment : androidx.fragment.app.Fragment(), OnPagerNumberChangeListener, View.OnClickListener {
+    private lateinit var viewPager: androidx.viewpager.widget.ViewPager
 
     private lateinit var pagerIndicator: IndefinitePagerIndicator
     private lateinit var pagerIndicatorVertical: IndefinitePagerIndicator
@@ -30,13 +29,13 @@ class RTLViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View
     ): View? {
         val view = inflater.inflate(R.layout.fragment_rtl_view_pager_sample, container, false)
 
-        isVerticalEnabled = context.getSharedPreferences(
+        isVerticalEnabled = context?.getSharedPreferences(
             MainActivity.SHARED_PREFERENCES,
             AppCompatActivity.MODE_PRIVATE
-        ).getBoolean(
+        )?.getBoolean(
             MainActivity.isVerticalIndicatorKeyPreference,
             false
-        )
+        ) ?: false
 
         bindViews(view)
         setupViews()
@@ -53,8 +52,10 @@ class RTLViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View
     }
 
     private fun setupViews() {
-        pagerAdapter = ViewPagerAdapter(context)
-        viewPager.adapter = pagerAdapter
+        context?.let { context ->
+            pagerAdapter = ViewPagerAdapter(context)
+            viewPager.adapter = pagerAdapter
+        }
         if (isVerticalEnabled) {
             pagerIndicatorVertical.attachToViewPager(viewPager)
             pagerIndicatorVertical.visibility = View.VISIBLE
@@ -62,7 +63,6 @@ class RTLViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View
             pagerIndicator.attachToViewPager(viewPager)
             pagerIndicator.visibility = View.VISIBLE
         }
-
 
         previousButton.setOnClickListener(this)
         nextButton.setOnClickListener(this)
@@ -73,16 +73,17 @@ class RTLViewPagerSampleFragment : Fragment(), OnPagerNumberChangeListener, View
     }
 
     override fun onClick(v: View?) {
+        val adapter = viewPager.adapter ?: return
         when (v?.id) {
             R.id.viewpager_previous_button -> {
                 if (viewPager.currentItem == 0) {
-                    viewPager.currentItem = viewPager.adapter.count - 1
+                    viewPager.currentItem = adapter.count - 1
                 } else {
                     viewPager.currentItem = viewPager.currentItem - 1
                 }
             }
             R.id.viewpager_next_button -> {
-                if (viewPager.currentItem == viewPager.adapter.count - 1) {
+                if (viewPager.currentItem == adapter.count - 1) {
                     viewPager.currentItem = 0
                 } else {
                     viewPager.currentItem = viewPager.currentItem + 1
