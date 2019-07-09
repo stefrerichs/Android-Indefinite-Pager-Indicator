@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Paint
-import androidx.annotation.ColorInt
+//import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.viewpager.widget.ViewPager
@@ -50,9 +50,9 @@ class IndefinitePagerIndicator @JvmOverloads constructor(
     private var supportRtl = false
     private var verticalSupport = false
 
-    @ColorInt
+//    @ColorInt
     private var dotColor: Int = ContextCompat.getColor(this.context, R.color.default_dot_color)
-    @ColorInt
+//    @ColorInt
     private var selectedDotColor: Int = ContextCompat.getColor(
         this.context,
         R.color.default_selected_dot_color
